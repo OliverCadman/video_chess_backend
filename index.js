@@ -6,9 +6,10 @@ const app = express();
 
 const server = http.createServer(app);
 const io = socketio(server, {
-    cors: {
-        origin: "http://localhost:8000"
-    }
+  cors: {
+    origin:
+      "https://chess-stream.web.app/",
+  },
 });
 const gameLogic = require("./logic")
 
