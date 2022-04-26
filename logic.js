@@ -1,5 +1,3 @@
-const { signal } = require("nodemon/lib/config/defaults");
-
 var io;
 
 var gameSocket;
