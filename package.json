@@ -14,5 +14,8 @@
     "nodemon": "^2.0.15",
     "socket-io": "^1.0.0",
     "socket.io": "^4.4.1"
+  },
+  "engines": {
+    "node": "v17.3.1"
   }
 }
