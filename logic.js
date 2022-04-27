@@ -1,10 +1,11 @@
 var io;
-
 var gameSocket;
-
 var gamesInSession = [];
 
 const initGame = (sio, socket) => {
+    /* Register SocketIO Event Listeners
+       for game logic and video chat.
+    */
     io = sio;
     gameSocket = socket;
 
@@ -22,18 +23,30 @@ const initGame = (sio, socket) => {
 }
 
 function chatLogic () {
+    /* Register event listeners for video chat. */
     gameSocket.on("callUser", data => {
         io.to(data.userToCall).emit("video connected", {signal: data.signalData, from: data.from})
     })
 
     gameSocket.on("acceptCall", data => {
-
         io.to(data.to).emit("callAccepted", data.signal)
     })
 }
 
 function playerJoinGame (idData) {
+    /*  
+        The game's ID is used to identify the rooms.
+
+        If two identical game IDs are present in one
+        room, this means that two players have joined a room,
+        and a game is started.
+
+        If a third player attempts to join a room, the status
+        is updated to inform that the room is already full.
+    */
     var sock = this;
+
+    // 
     const rooms = Array.from(io.sockets.adapter.rooms);
     const room = rooms.map((room) => {
         if (room.includes(idData.gameId)) {
@@ -46,7 +59,8 @@ function playerJoinGame (idData) {
         return;
     }
 
-    if (room.length < 4) {
+
+    if (room.length < 3) {
         idData.mySocketId = sock.id;
         sock.join(idData.gameId);
 
@@ -61,24 +75,30 @@ function playerJoinGame (idData) {
 }
 
 function createNewGame(gameId) {
-    this.emit("createNewGame", {gameId: gameId, mySocketId: this.id});
+  /**
+     *  Create a SocketIO room upon a player
+        submitting their username and joining a game.
+     */
 
-    this.join(gameId);
-
+  this.emit("createNewGame", { gameId: gameId, mySocketId: this.id });
+  this.join(gameId);
 }
 
 function newMove(move) {
+    /** Update SocketIO room with new chess move. */
     const gameId = move.gameId;
     io.to(gameId).emit("opponent move", move);
 }
 
 function onDisconnect() {
+    /** Remove game from array of games in session if a user disconnects. */
     let i = gamesInSession.indexOf(gameSocket);
     gamesInSession.splice(i, 1);
 
 }
 
 function requestUserName(gameId) {
+    /** Request a second player's username when they join the game. */
     io.to(gameId).emit("give userName", this.id);
 }
 
@@ -88,9 +108,9 @@ function receivedUserName(data) {
 }
 
 function startNewGame(data) {
-    console.log("HELLO")
-    console.log("data", data);
-    // data.socketId = this.id;
+    /** Emit a 'restartGame' event if a user
+     * chooses to start new game after checkmate.
+     */
     io.to(data.gameId).emit("restartGame");
 }
 
