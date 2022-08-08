@@ -5,7 +5,6 @@ var gameSocket;
 var gamesInSession = [];
 
 const initGame = (sio, socket) => {
-    console.log("game initialized")
     io = sio;
     gameSocket = socket;
 
@@ -24,10 +23,12 @@ const initGame = (sio, socket) => {
 
 function chatLogic () {
     gameSocket.on("callUser", data => {
+        console.log("calling user...", data)
         io.to(data.userToCall).emit("video connected", {signal: data.signalData, from: data.from})
     })
 
     gameSocket.on("acceptCall", data => {
+        console.log("accepting call...", data)
         io.to(data.to).emit("callAccepted", data.signal)
     })
 }
